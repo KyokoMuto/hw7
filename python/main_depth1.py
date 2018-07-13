@@ -6,8 +6,6 @@ import json
 import logging
 import random
 import webapp2
-import sys
-import time
 
 # Reads json description of the board and provides simple interface.
 class Game:
@@ -126,86 +124,22 @@ def PrettyMove(move):
 	m = move["Where"]
 	return '%s%d' % (chr(ord('A') + m[0] - 1), m[1])
 
-def search_minmax(g,valid_moves):
-    begin=time.time()
-    recent_move=random.choice(valid_moves)
-    for depth in range(1,50):
-        if time.time()-begin>5:
-            return recent_move
-        else:
-            if depth==1:
-                next_hand=valid_moves[0]
-                count_min=50
-                for move in valid_moves:
-                    board=g.NextBoardPosition(move)
-                    count_nexthand = len(board.ValidMoves())#min_nexthand#depth1
-                    if count_min>count_nexthand:
-                        count_min=count_nexthand
-                        next_hand=move
-                recent_move=next_hand
-            else:
-                next_hand=valid_moves[0]
-                count_min=50
-                for move in valid_moves:
-                    board=g.NextBoardPosition(move)
-                    nexthands = board.ValidMoves()#min_nexthand#depth1
-                    if len(nexthands) == 0:##last1
-                        return recent_move
-                    depth_minmax=minmax(board,nexthands,depth-1,begin,recent_move)
-                    if depth_minmax==-1:
-                        return recent_move
-                    if depth_minmax<count_min:
-                        count_min=depth_minmax
-                        next_hand=move
-                recent_move=next_hand
-def minmax(g,nexthands,depth,begin,recent_move):
-    if depth==1:
-        if depth%2==0:#1!!!depth=1
-            count=-2
-            for move in nexthands:
-                board=g.NextBoardPosition(move)
-                count_nexthands = len(board.ValidMoves())
-                if count_nexthands>count:
-                    count=count_nexthands
-            return count
-        else:
-            count=50
-            for move in nexthands:
-                board=g.NextBoardPosition(move)
-                count_nexthands = len(board.ValidMoves())
-                if count_nexthands<count:
-                    count=count_nexthands
-            return count
-    else:
-        if time.time()-begin>13:
-            return recent_move
-        if depth%2==0:#1!!!depth=1
-            count=-2
-            for move in nexthands:
-                board=g.NextBoardPosition(move)
-                nexthands = board.ValidMoves()
-                if len(nexthands) == 0:
-                        return -1##owarinotoki#pass
-                depth_minmax=minmax(board,nexthands,depth-1,begin,recent_move)
-                if depth_minmax==-1:
-                        return -1
-                if depth_minmax>count:
-                    count=depth_minmax
-            return count
-        else:
-            count=50
-            for move in nexthands:
-                board=g.NextBoardPosition(move)
-                nexthands = board.ValidMoves()
-                if len(nexthands) == 0:
-                        return -1
-                depth_minmax=minmax(board,nexthands,depth-1,begin,recent_move)
-                if depth_minmax==-1:
-                        return -1
-                if depth_minmax<count:
-                    count=depth_minmax
-            return count
+def minmax(g,valid_moves):
+    
+    next_hand=valid_moves[0]
+    count_min=0
+    for move in valid_moves:
+        board=g.NextBoardPosition(move)
+        count_nexthand = len(board.ValidMoves())#min_nexthand#depth1
+        if count_min>count_nexthand:
+            count_min=count_nexthand
+            next_hand=move
+        #if board["Next"] = 2:#1!!!depth=1
+            
         
+    #move = random.choice(valid_moves)
+    return move
+
 class MainHandler(webapp2.RequestHandler):
     # Handling GET request, just for debugging purposes.
     # If you open this handler directly, it will show you the
@@ -251,7 +185,7 @@ Paste JSON here:<p/><textarea name=json cols=80 rows=24></textarea>
                 # You'll probably want to change how this works, to do something
                 # more clever than just picking a random move.
 	    	#move = random.choice(valid_moves)
-	    	move=search_minmax(g,valid_moves)
+	    	move=minmax(g,valid_moves)
 	    	self.response.write(PrettyMove(move))
 
 app = webapp2.WSGIApplication([
